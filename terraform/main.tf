@@ -45,3 +45,25 @@ resource "aws_sns_topic" "weather_alerts" {
     }
   })
 }
+
+resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
+  alarm_name          = "weather-pipeline-lambda-errors"
+  alarm_description   = "Alerts when the weather Lambda function encounters errors."
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 1
+  period              = 300
+  statistic           = "Sum"
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  treat_missing_data  = "missing"
+
+  dimensions = {
+    FunctionName = "weather-pdf-downloader"
+  }
+
+  alarm_actions = [
+    aws_sns_topic.weather_alerts.arn
+  ]
+}
