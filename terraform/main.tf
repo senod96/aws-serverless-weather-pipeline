@@ -22,3 +22,26 @@ resource "aws_s3_bucket_versioning" "weather_bucket_versioning" {
     status = "Enabled"
   }
 }
+
+resource "aws_sns_topic" "weather_alerts" {
+  name         = "weather-pipeline-alerts"
+  display_name = "weather-pipeline-alerts"
+
+  delivery_policy = jsonencode({
+    http = {
+      defaultHealthyRetryPolicy = {
+        minDelayTarget     = 20
+        maxDelayTarget     = 20
+        numRetries         = 3
+        numMaxDelayRetries = 0
+        numNoDelayRetries  = 0
+        numMinDelayRetries = 0
+        backoffFunction    = "linear"
+      }
+      defaultRequestPolicy = {
+        headerContentType = "text/plain; charset=UTF-8"
+      }
+      disableSubscriptionOverrides = false
+    }
+  })
+}
